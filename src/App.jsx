@@ -65,12 +65,12 @@ export default function App() {
   const [showAdd, setShowAdd] = useState(false);
   const [filter, setFilter] = useState('All');
   const [newL, setNewL] = useState(emptyLead);
-  const [apiKey, setApiKey] = useState(localStorage.getItem('qf_gemini_key') || '');
+  const [apiKey, setApiKey] = useState(localStorage.getItem('qf_or_key') || '');
   const [showKeyInput, setShowKeyInput] = useState(false);
 
   const saveApiKey = (key) => {
     setApiKey(key);
-    localStorage.setItem('qf_gemini_key', key);
+    localStorage.setItem('qf_or_key', key);
     setShowKeyInput(false);
   };
 
@@ -172,11 +172,11 @@ Be hyper-specific. Return ONLY valid JSON.`;
       {/* API KEY MODAL */}
       {showKeyInput && (
         <div style={{background:T.surface, borderBottom:`1px solid ${T.border}`, padding:'12px 22px', display:'flex', gap:10, alignItems:'center'}}>
-          <span style={{fontSize:10, color:T.sub, fontWeight:700, letterSpacing:1, flexShrink:0}}>GEMINI API KEY (FREE):</span>
-          <input type="password" defaultValue={apiKey} id="apiKeyInp" placeholder="AIza..." style={{...inp, flex:1, maxWidth:400}} />
+          <span style={{fontSize:10, color:T.sub, fontWeight:700, letterSpacing:1, flexShrink:0}}>OPENROUTER API KEY (FREE):</span>
+          <input type="password" defaultValue={apiKey} id="apiKeyInp" placeholder="sk-or-v1-..." style={{...inp, flex:1, maxWidth:400}} />
           <button className="hb" onClick={()=>saveApiKey(document.getElementById('apiKeyInp').value)}
             style={{...btn(), background:T.accentBg, border:`1px solid ${T.accent}`, color:T.accent, padding:'7px 14px', fontSize:11}}>SAVE</button>
-          <span style={{fontSize:10, color:T.sub}}>Free key from aistudio.google.com — stored locally only.</span>
+          <span style={{fontSize:10, color:T.sub}}>Free key from openrouter.ai — stored locally only. — stored locally only.</span>
         </div>
       )}
 

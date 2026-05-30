@@ -6,31 +6,39 @@ export default async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
   const { system, user, apiKey } = req.body;
-  const key = process.env.GEMINI_API_KEY || apiKey;
+  const key = process.env.OPENROUTER_API_KEY || apiKey;
 
   if (!key) {
-    return res.status(400).json({ error: 'No API key. Get a FREE key from aistudio.google.com then set GEMINI_API_KEY in Vercel env vars.' });
+    return res.status(400).json({
+      error: 'No API key. Get a FREE key from openrouter.ai then set OPENROUTER_API_KEY in Vercel env vars.'
+    });
   }
 
   try {
-    const prompt = `${system}\n\nUser request:\n${user}`;
-    const response = await fetch(
-      `https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${key}`,
-      {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          contents: [{ parts: [{ text: prompt }] }],
-          generationConfig: { temperature: 0.7, maxOutputTokens: 1000 },
-        }),
-      }
-    );
+    const response = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Authorization': `Bearer ${key}`,
+        'Content-Type': 'application/json',
+        'HTTP-Referer': 'https://qualityfirst-lead-machine.vercel.app',
+        'X-Title': 'QualityFirst Lead Machine',
+      },
+      body: JSON.stringify({
+        model: 'meta-llama/llama-3.3-70b-instruct:free',
+        messages: [
+          { role: 'system', content: system },
+          { role: 'user', content: user }
+        ],
+        max_tokens: 1000,
+        temperature: 0.7,
+      }),
+    });
 
     const data = await response.json();
-    if (data.error) throw new Error(data.error.message);
+    if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
-    const text = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
-    // Return in same shape so frontend works unchanged
+    const text = data.choices?.[0]?.message?.content || '';
+    // Return in Anthropic-compatible shape so frontend works unchanged
     return res.status(200).json({
       content: [{ type: 'text', text }]
     });
