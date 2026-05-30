@@ -1,3 +1,16 @@
+// Sanitize unicode characters that break ByteString encoding
+function sanitize(str) {
+  if (!str) return '';
+  return str
+    .replace(/\u2014/g, '--')       // em dash
+    .replace(/\u2013/g, '-')        // en dash
+    .replace(/\u2018|\u2019/g, "'") // curly single quotes
+    .replace(/\u201C|\u201D/g, '"') // curly double quotes
+    .replace(/\u2026/g, '...')      // ellipsis
+    .replace(/\u00D7/g, 'x')        // multiplication sign
+    .replace(/[^\x00-\x7F]/g, ' '); // any remaining non-ASCII
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'POST, OPTIONS');
@@ -26,8 +39,8 @@ export default async function handler(req, res) {
       body: JSON.stringify({
         model: 'meta-llama/llama-3.3-70b-instruct:free',
         messages: [
-          { role: 'system', content: system },
-          { role: 'user', content: user }
+          { role: 'system', content: sanitize(system) },
+          { role: 'user',   content: sanitize(user)   }
         ],
         max_tokens: 1000,
         temperature: 0.7,
@@ -38,7 +51,6 @@ export default async function handler(req, res) {
     if (data.error) throw new Error(data.error.message || JSON.stringify(data.error));
 
     const text = data.choices?.[0]?.message?.content || '';
-    // Return in Anthropic-compatible shape so frontend works unchanged
     return res.status(200).json({
       content: [{ type: 'text', text }]
     });
